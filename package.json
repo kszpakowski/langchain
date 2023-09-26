@@ -1,0 +1,17 @@
+{
+  "name": "lanchain",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/pdf-parse": "^1.1.2",
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "langchain": "^0.0.154",
+    "pdf-parse": "^1.1.1",
+    "walkdir": "^0.4.1"
+  }
+}
