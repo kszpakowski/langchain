@@ -4,7 +4,8 @@ import path from "path"
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { OllamaEmbeddings } from "langchain/embeddings/ollama";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
+import { createClient } from "redis";
+import { RedisVectorStore } from "langchain/vectorstores/redis";
 
 const docs = await walk.async('docs');
 const embeddings = new OllamaEmbeddings({
@@ -12,7 +13,17 @@ const embeddings = new OllamaEmbeddings({
     model: "llama2:13b"
 });
 
-const vectorStore = await MemoryVectorStore.fromExistingIndex(embeddings)
+const client = createClient({
+    url: "redis://localhost:6379",
+});
+
+await client.connect();
+
+const vectorStore = new RedisVectorStore(embeddings, {
+    redisClient: client,
+    indexName: "docs",
+});
+
 
 
 for (var doc of docs.filter(doc => doc.includes('/525.pdf'))) {
@@ -31,13 +42,11 @@ for (var doc of docs.filter(doc => doc.includes('/525.pdf'))) {
 
         const splitDocs = await textSplitter.splitDocuments(data);
 
-        console.log('split docs length', splitDocs.length)
-
         vectorStore.addDocuments(splitDocs)
-
-
 
     } catch (e) {
         console.log(e)
     }
 }
+
+await client.disconnect();
